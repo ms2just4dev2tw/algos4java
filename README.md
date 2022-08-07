@@ -34,6 +34,6 @@ https://algs4.cs.princeton.edu/home/
     
 
 ### 字符串算法(org.self.string)  
-    (1) BF算法 BruteForce, 又称简单匹配算法
-    (2) KMP算法 D.E.Knuth,J.H.Morris,V.R.Pratt
+    (1) BF 算法 BruteForce, 又称简单匹配算法
+    (2) KMP 算法 D.E.Knuth,J.H.Morris,V.R.Pratt
     (3) Deterministic Finite Automaton 确定有穷状态机

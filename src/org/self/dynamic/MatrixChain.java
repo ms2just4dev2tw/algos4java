@@ -5,12 +5,12 @@ package org.self.dynamic;
  * <p>
  * 有一个矩阵连乘例子：A1(30x35)A2(35x15)A3(15x5)A4(5x10)A5(10x20)A6(20x25)
  * <p>
- * 0(0)	15750(1)	7875(2)		9375(3)		11875(4)	15125(5)
- * 			0(0)			2625(1)		4375(2)		7125(3)		10500(4)
- * 							0(0)			750(1)		2500(2)		5375(3)
- * 											0(0)			1000(1)		3500(2)
- * 															0(0)			5000(1)
- * 																			0(0)
+ * 0(0)    15750(1)    7875(2)    9375(3)    11875(4)    15125(5)
+ *         0(0)        2625(1)    4375(2)    7125(3)     10500(4)
+ *                     0(0)       750(1)     2500(2)     5375(3)
+ *                                0(0)       1000(1)     3500(2)
+ *                                           0(0)        5000(1)
+ *                                                       0(0)
  * 
  * @author TungWang
  */
@@ -18,8 +18,10 @@ public class MatrixChain {
 
 	// 压缩存储矩阵上三角元素
 	private class TriangleArray {
-		// rank: 矩阵的阶；array: 存储的数据
-		private int rank, array[];
+		// rank: 矩阵的阶
+		private int rank;
+		// array: 存储的数据
+		private int array[];
 
 		private TriangleArray(int rank) {
 			this.rank = rank;

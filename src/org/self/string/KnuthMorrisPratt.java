@@ -10,95 +10,100 @@ package org.self.string;
  */
 public class KnuthMorrisPratt {
 
-	// 保留部分匹配信息的next数组
-	private int next[];
-
-	public KnuthMorrisPratt() {
-	}
-
-	// 一般的KMP算法
-	public int index(String subject, String template) {
-		return index(subject, template, false);
-	}
-
 	/**
-	 * 
 	 * @param subject 主串，目标串
 	 * @param template 模式串
 	 * @param Optimized 开启优化
 	 * @return 目标串匹配模式串的起始位置
 	 */
-	public int index(String subject, String template, boolean Optimized) {
-		char sub[] = subject.toCharArray(), tmp[] = template.toCharArray();
+	public static int index(String subjectStr, String templateStr, boolean Optimized) {
+		// 字符串转换成字符数组
+		char subCharArr[] = subjectStr.toCharArray(), tmplCharArr[] = templateStr.toCharArray();
+		// 部分匹配表
+		int[] partialMatchTable = null;
 		if (Optimized)
-			initNextOptimize(tmp);
+			partialMatchTable = getOptimizedPartialMatchTable(tmplCharArr);
 		else
-			initNext(tmp);
-		//
-		int indexi = 0, indexj = 0;
-		for (; indexi < sub.length && indexj < tmp.length;) {
-			if (indexj == -1 || sub[indexi] == tmp[indexj]) {
-				indexi++;
-				indexj++;
+			partialMatchTable = getPartialMatchTableBy(tmplCharArr);
+
+		// 主串和模式串的索引
+		int index4sub = 0, index4tmpl = 0;
+		// 主串索引超过主串字符数组的最大索引, 即意味着匹配失败; 模式串索引超过模式串字符数组的最大索引, 即意味着匹配成功
+		while (index4sub < subCharArr.length && index4tmpl < tmplCharArr.length) {
+			if (index4sub == -1 || subCharArr[index4sub] == tmplCharArr[index4tmpl]) {
+				index4sub++;
+				index4tmpl++;
 			} else
-				indexj = next[indexj];
+				index4sub = partialMatchTable[index4tmpl];
 		}
+
 		// 返回结果
-		return indexj == tmp.length ? indexi - indexj : -1;
+		return index4tmpl == tmplCharArr.length ? index4sub - index4tmpl : -1;
 	}
 
 	/**
-	 * 这个是一般的初始化next数组的方法
-	 * <p>
-	 * 在 0 < index < j 时有<p>
-	 * next[index] = MAX{k | "t0t1......t(k-1)" == "t(index-k)t(index-k+1)......t(index-1)"}
-	 * <p>
-	 * 在index = 0 时有<p>
-	 * next[index] = -1
-	 * <p>
-	 * 其他情况<p>
-	 * next[index] = 0
+	 *            a a a a b
+	 * index4pmt  0 1 2 3 4
+	 * pmtValue  -1 0 1 2 3
 	 * 
-	 * @param tmp 模式串的字符数组
+	 * @param tmplCharArr
+	 * @return
 	 */
-	private void initNext(char tmp[]) {
-		next = new int[tmp.length];
-		next[0] = -1;
-		for (int j = 0, k = -1; j < tmp.length - 1;) {
-			if (k == -1 || tmp[j] == tmp[k]) {
-				j++;
-				k++;
-				next[j] = k;
-			} else
-				k = next[k];
+	public static int[] getPartialMatchTableBy(char[] tmplCharArr) {
+		int[] partialMatchTable = new int[tmplCharArr.length];
+
+		// 部分匹配表的首项值为 -1
+		partialMatchTable[0] = -1;
+
+		// index4pmt: 部分匹配表的索引, 即 tmplCharArr 下标值; pmtValue: 部分匹配表存储的模式串索引
+		for (int index4pmt = 0, pmtValue = -1; index4pmt < tmplCharArr.length - 1;) {
+			// 如果 index4pmt 指向的 tmplChar 与 pmtValue 指向的 tmplChar 相同, 则 index4pmt 与 pmtValue
+			// 步进
+			if (pmtValue == -1 || tmplCharArr[index4pmt] == tmplCharArr[pmtValue]) {
+				partialMatchTable[++index4pmt] = ++pmtValue;
+			} else {
+				// 将 pmtValue 回退到之前的 partialMatchTable[pmtValue]
+				pmtValue = partialMatchTable[pmtValue];
+			}
 		}
+
+		return partialMatchTable;
 	}
 
 	/**
-	 * 对于 aaaab这样的模式串和主串aaabaaaab
-	 * <p>
-	 * 如果在<b>i=3，j=3</b>处匹配失败， 会使得 i 的值保持不变，j的值变为next[j] = 2
-	 * <p>
-	 * 上面的情况会多次发生，直到<b> i 的值变为4，j 的值变为0</b>
-	 * <p>
-	 * 对于这样的情况，需要对于tmp[j] == tmp[k]这样的情况使得next[j] = next[k];
+	 *            a  a  a  a  b
+	 * index4pmt  0  1  2  3  4
+	 * pmtValue  -1 -1 -1 -1  3
 	 * 
-	 * @param tmp
+	 * @param tmplCharArr
+	 * @return
 	 */
-	private void initNextOptimize(char tmp[]) {
-		next = new int[tmp.length];
-		next[0] = -1;
-		for (int j = 0, k = -1; j < tmp.length - 1;) {
-			if (k == -1 || tmp[j] == tmp[k]) {
-				j++;
-				k++;
-				if (tmp[j] != tmp[k])
-					next[j] = k;
+	public static int[] getOptimizedPartialMatchTable(char[] tmplCharArr) {
+		int[] partialMatchTable = new int[tmplCharArr.length];
+
+		// 部分匹配表的首项值为 -1
+		partialMatchTable[0] = -1;
+
+		// index4pmt: 部分匹配表的索引, 即 tmplCharArr 下标值; pmtValue: 部分匹配表存储的模式串索引
+		for (int index4pmt = 0, pmtValue = -1; index4pmt < tmplCharArr.length - 1;) {
+			// 如果 index4pmt 指向的 tmplChar 与 pmtValue 指向的 tmplChar 相同, 则 index4pmt 与 pmtValue
+			// 步进
+			if (pmtValue == -1 || tmplCharArr[index4pmt] == tmplCharArr[pmtValue]) {
+				index4pmt++;
+				pmtValue++;
+				// 如果 index4pmt 与 pmtValue 步进的情况与之前的情况一样相同, 则使用 pmtValue 的指向与 index4pmt 对应
+				// 否则使用 pmtValue 作为 index4pmt 的值
+				if (tmplCharArr[index4pmt] == tmplCharArr[pmtValue])
+					partialMatchTable[index4pmt] = partialMatchTable[pmtValue];
 				else
-					next[j] = next[k];
-			} else
-				k = next[k];
+					partialMatchTable[index4pmt] = pmtValue;
+			} else {
+				// 将 pmtValue 回退到之前的 partialMatchTable[pmtValue]
+				pmtValue = partialMatchTable[pmtValue];
+			}
 		}
+
+		return partialMatchTable;
 	}
 
 }
